@@ -61,7 +61,7 @@ def _generate_data(path, architecture, max_sentence_length):
 
     logging.info("Generating")
 
-    ner_vocab = NerVocab(path)
+    ner_vocab = NerVocab()
     path_to_data = NerDataset.data_dirname() / path
     tokenizer = AutoTokenizer.from_pretrained(architecture, use_fast=True)
     max_sentence_length = min(max_sentence_length, tokenizer.max_len_single_sentence)
@@ -128,6 +128,18 @@ def _generate_data(path, architecture, max_sentence_length):
                     input_ids.extend([tokenizer.sep_token_id])
                     attention_mask.extend([1])
                     targets.extend([ner_vocab.get_id("O")])
+                    # pad
+                    input_ids.extend(
+                        [tokenizer.pad_token_id]
+                        * (max_sentence_length + 2 - len(input_ids))
+                    )
+                    attention_mask.extend(
+                        [0] * (max_sentence_length + 2 - len(attention_mask))
+                    )
+                    targets.extend(
+                        [ner_vocab.get_id("O")]
+                        * (max_sentence_length + 2 - len(targets))
+                    )
                     # add example to dataset
                     dataset.append((input_ids, attention_mask, targets))
                     break
@@ -137,7 +149,9 @@ def _generate_data(path, architecture, max_sentence_length):
 
 def _save_data(dataset, path, architecture, max_sentence_length):
     path_to_data = NerDataset.data_dirname() / path
-    filename = f"{path_to_data.stem}_{architecture.replace('/', '-')}_{max_sentence_length}.pkl"
+    filename = (
+        f"{path_to_data.stem}_{architecture.replace('/', '-')}_{max_sentence_length}.pt"
+    )
     path = path_to_data.parent / filename
     torch.save(dataset, path)
     logging.info("Saving")
@@ -150,8 +164,7 @@ def _load_data(path):
 
 
 class NerVocab:
-    def __init__(self, path):
-        self.path = path
+    def __init__(self):
         self.tag2id = {}
         self.id2tag = {}
 
@@ -166,20 +179,23 @@ class NerVocab:
         return Path(__file__).resolve().parents[2] / "data/preprocessed"
 
     def _make_vocab(self):
-        path_to_data = NerVocab.data_dirname() / self.path
-        with open(path_to_data, "r") as f:
-            ner_tags = set()
-            for line in f.readlines():
-                line = line.rstrip("\n")
-                if len(line) == 1:
-                    continue
-                _, tag = line.split(" ")
-                ner_tags.add(tag)
+        ner_tags = set()
+        for file in ["train.txt", "valid.txt"]:
+            path_to_data = NerVocab.data_dirname() / file
+            with open(path_to_data, "r") as f:
+                for line in f.readlines():
+                    line = line.rstrip("\n")
+                    if len(line) == 1:
+                        continue
+                    _, tag = line.split(" ")
+                    ner_tags.add(tag)
 
         sorted(ner_tags)
         for i, tag in enumerate(ner_tags):
             self.tag2id[tag] = i
             self.id2tag[i] = tag
+        self.tag2id["<UNK>"] = -999
+        self.id2tag[-999] = "<UNK>"
 
     def _save_vocab(self):
         path_to_data = NerVocab.data_dirname() / "ner_vocab.json"
@@ -191,13 +207,17 @@ class NerVocab:
 
     def _load_vocab(self):
         path_to_data = NerVocab.data_dirname() / "ner_vocab.json"
-        with open(path_to_data, "w") as f:
+        with open(path_to_data, "r") as f:
             vocab = json.load(f)
         self.tag2id = vocab["tag2id"]
         self.id2tag = vocab["id2tag"]
 
     def get_id(self, tag):
-        return self.tag2id[tag]
+        return self.tag2id.get(tag, -999)
 
     def get_tag(self, id):
-        return self.id2tag[id]
+        return self.id2tag.get(id, "<UNK>")
+
+    def __len__(self):
+        if self.id2tag and self.tag2id:
+            return len(self.id2tag)
