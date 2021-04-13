@@ -1,0 +1,43 @@
+{
+    "dataset": {
+        "name": "NerDataset",
+        "train_path": "train_allegro-herbert-base-cased_25.pt",
+        "valid_path": "valid_allegro-herbert-base-cased_25.pt",
+        "test_path": "test_allegro-herbert-base-cased_25.pt"
+    },
+    "model": "NerModel",
+    "network": {
+        "name": "AutoTransformer",
+        "args": {
+            "architecture": "allegro/herbert-base-cased",
+            "freeze": true,
+            "activation": "torch.nn.LogSoftmax"
+        }
+    },
+    "device": "cpu",
+    "dataset_args": {
+        "max_sentence_length": 25,
+        "batch_size": 16
+    },
+    "train_args": {
+        "epochs": 25,
+        "early_stopping": {
+            "patience": 3,
+            "verbose": true,
+            "delta": 1e-3
+        },
+        "criterion": {
+            "object": "torch.nn.NLLLoss",
+            "params": {
+                "reduction": "mean"
+            }
+        },
+        "optimizer": {
+            "object": "torch.optim.AdamW",
+            "params": {
+                "lr": 3e-4,
+                "weight_decay": 0.01
+            }
+        }
+    }
+}
