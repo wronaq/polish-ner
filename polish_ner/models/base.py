@@ -4,9 +4,6 @@ import torch
 import time
 from .early_stopping import EarlyStopping
 from importlib import import_module
-import logging
-
-logging.basicConfig(level=logging.INFO, filename="train.log")
 
 
 class Model:
@@ -60,7 +57,7 @@ class Model:
                 input_ids = batch["input_ids"].to(self.device)
                 attention_mask = batch["attention_mask"].to(self.device)
                 targets = batch["target"].to(self.device)
-                outputs = self.network(input_ids, attention_mask)
+                outputs = self.network(input_ids, attention_mask).transpose(1, 2)
                 loss = criterion(outputs, targets)
                 self.optimizer().zero_grad()
                 loss.backward()
@@ -69,13 +66,14 @@ class Model:
                 # save results
                 running_loss += loss.item()
                 running_f1 += self.f1_micro(targets, outputs)
-                if i > 0 and i % 100 == 0:
+                if i > 0 and i % 50 == 0:
                     stats = (
                         f"Epoch: {epoch+1}/{epochs}, batch: {i}/{len(train_loader)}, "
                         f"train_loss: {running_loss/i:.5f}, train_f1_score: {running_f1/i:.5f}"
                     )
                     print(stats, flush=True)
-                    logging.info(stats)
+                    with open("stats.log", "a") as f:
+                        print(stats, file=f)
             if testing:
                 continue
             # calculate loss and accuracy on validation dataset
@@ -83,11 +81,12 @@ class Model:
                 val_loss, val_f1 = self.evaluate(self._dataloaders.valid_loader)
             stats = (
                 f"Epoch: {epoch+1}/{epochs}, "
-                f"train_loss: {running_loss/i:.5f}, train_cosine_similarity: {running_f1/i:.5f}, "
-                f"valid_loss: {val_loss:.5f}, valid_cosine_similarity: {val_f1:.5f}"
+                f"train_loss: {running_loss/i:.5f}, train_f1_score: {running_f1/i:.5f}, "
+                f"valid_loss: {val_loss:.5f}, valid_f1_score: {val_f1:.5f}"
             )
             print(stats)
-            logging.info(stats)
+            with open("stats.log", "a") as f:
+                print(stats, file=f)
 
             # save after each epoch
             self.save_weights()
@@ -104,7 +103,6 @@ class Model:
             self.load_weights(path_to_weights=self._early_stopping.path)
             self.save_weights()
             print("\nFinished training")
-            logging.info("\nFinished training")
 
     def parametrize(self, obj, def_obj, def_params):
         try:
@@ -150,7 +148,7 @@ class Model:
             input_ids = batch["input_ids"].to(self.device)
             attention_mask = batch["attention_mask"].to(self.device)
             targets = batch["target"].to(self.device)
-            outputs = self.network(input_ids, attention_mask)
+            outputs = self.network(input_ids, attention_mask).transpose(1, 2)
             loss = criterion(outputs, targets)
             # results
             valid_loss += loss.item()
@@ -160,7 +158,7 @@ class Model:
 
     @staticmethod
     def f1_micro(true, pred):
-        predicted_tag = pred.argmax(dim=2)
+        predicted_tag = pred.argmax(dim=1)
         true_positive = torch.eq(true, predicted_tag).sum().float()
-        f1_score = torch.div(true_positive, len(true))
+        f1_score = torch.div(true_positive, true.numel())
         return f1_score
