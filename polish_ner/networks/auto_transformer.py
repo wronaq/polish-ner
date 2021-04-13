@@ -28,7 +28,7 @@ class AutoTransformer(nn.Module):
 
         module_path, class_name = activation.rsplit(".", 1)
         module = import_module(module_path)
-        self._activation = getattr(module, class_name)(dim=1)
+        self._activation = getattr(module, class_name)(dim=2)
 
         self._ner_vocab = NerVocab()
         self.classification_head = nn.Sequential(
