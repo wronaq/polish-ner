@@ -12,7 +12,7 @@ class NerModel(Model):
         tokenizer = AutoTokenizer.from_pretrained(
             self.network.architecture, use_fast=True
         )
-        input_text = tokenizer(
+        text = tokenizer(
             input_text,
             return_token_type_ids=False,
             is_split_into_words=False,
@@ -21,31 +21,33 @@ class NerModel(Model):
         )
         self.network.eval()
         predictions = (
-            self.network(input_text["input_ids"], input_text["attention_mask"])
+            self.network(text["input_ids"], text["attention_mask"])
             .squeeze()
             .argmax(dim=1)
         )
 
-        return self._output_pairs(
-            input_text["input_ids"].squeeze()[1:-1], predictions[1:-1], tokenizer
-        )
+        return self._output_pairs(input_text, predictions[1:-1], tokenizer)
 
-    def _output_pairs(self, tokens, prediction, tokenizer):
+    def _output_pairs(self, input_text, prediction, tokenizer):
         words = []
         tags = []
-        for i, (token, pred) in enumerate(zip(tokens, prediction)):
+        for i, (token, pred) in enumerate(
+            zip(tokenizer.tokenize(input_text), prediction)
+        ):
             if i == 0:
                 tag = self.ner_vocab.get_tag(str(pred.item()))
-                word = tokenizer.decode(token)
-            elif tag == self.ner_vocab.get_tag(str(pred.item())):
-                word += tokenizer.decode(token)
+                word = token
+            elif tag == self.ner_vocab.get_tag(str(pred.item())) and not word.endswith(
+                "</w>"
+            ):
+                word += token
             else:
-                words.append(word)
+                words.append(word[:-4])
                 tags.append(tag)
                 tag = self.ner_vocab.get_tag(str(pred.item()))
-                word = tokenizer.decode(token)
+                word = token
         # last pair
-        words.append(word)
+        words.append(word[:-4])
         tags.append(tag)
 
         return [(w, t) for w, t in zip(words, tags)]
