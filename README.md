@@ -70,7 +70,7 @@ pip install -r requirements.txt
 ```
 ## Training
 
-* Load and preprocess data (also create vocabulary)
+* Load and preprocess data (also create NER vocabulary)
 * Fine-tune HerBERT based on config.json
 * Evaluate on test set
 * Save weights into weights directory
