@@ -35,19 +35,19 @@ class NerModel(Model):
             zip(tokenizer.tokenize(input_text), prediction)
         ):
             if i == 0:
-                tag = self.ner_vocab.get_tag(str(pred.item()))
+                tag = self.ner_vocab.get_tag(str(pred.item()))[2:]
                 word = token
-            elif tag == self.ner_vocab.get_tag(str(pred.item())) and not word.endswith(
-                "</w>"
-            ):
+            elif tag == self.ner_vocab.get_tag(str(pred.item()))[
+                2:
+            ] and not word.endswith("</w>"):
                 word += token
             else:
-                words.append(word[:-4])
-                tags.append(tag)
-                tag = self.ner_vocab.get_tag(str(pred.item()))
+                words.append(word.replace("</w>", ""))
+                tags.append(tag if len(tag) > 1 else "O")
+                tag = self.ner_vocab.get_tag(str(pred.item()))[2:]
                 word = token
         # last pair
-        words.append(word[:-4])
-        tags.append(tag)
+        words.append(word.replace("</w>", ""))
+        tags.append(tag if len(tag) > 1 else "O")
 
         return [(w, t) for w, t in zip(words, tags)]
