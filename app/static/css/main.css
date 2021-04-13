@@ -1,0 +1,16 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.content {
+    margin: auto;
+    width: 50%;
+    text-align: center;
+  }
+
+mark.red {
+    color:#ff0000;
+    background: none;
+}
+

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Polish NER</title>
+{% endblock %}
+
+{% block body %}
+<div class='content'>
+    <h2>Wpisz zdanie poniżej:</h2>
+    <form action="/" method="POST">
+        <input type="text" name="content" id="content" size="75">
+        <input type="submit" value="Klasyfikuj">
+    </form>
+    <br>
+    {% if preds %}
+    {% for pred in preds %}
+    {% if pred[1] == 'O' %}
+    {{ pred[0] }}
+    {% else %}
+    <mark>{{ pred[0] }}</mark> <mark class="red">({{ pred[1] }})</mark>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
