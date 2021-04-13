@@ -23,7 +23,7 @@ class NerPredictor:
             if el[1] == "O":
                 text_with_tags += f"{el[0]} "
             else:
-                text_with_tags += f"\033[91m{el[0]} ({el[1]})\033[0m "
+                text_with_tags += f"\033[1m{el[0]}\033[0m \033[91m({el[1]})\033[0m "
         return text_with_tags
 
 
