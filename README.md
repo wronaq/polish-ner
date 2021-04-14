@@ -98,4 +98,4 @@ URL: `http://0.0.0.0:5000/`
 docker build -t polish-ner:latest .
 docker run -it -p 5000:5000 polish-ner:latest
 ```
-![image](demo.png)
+![image](demo.gif)
