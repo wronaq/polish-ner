@@ -4,58 +4,54 @@ Named Entity Recognition using HerBERT (base)
 
 ## Repository tree
 
-├── app
-│   ├── static
-│   │   └── css
-│   │       └── main.css
-│   ├── templates
-│   │   ├── base.html
-│   │   └── index.html
-│   └── app.py
-├── data
-│   ├── preprocessed
-│   │   ├── ner_vocab.json
-│   │   ├── test_allegro-herbert-base-cased_25.pt
-│   │   ├── test.txt
-│   │   ├── train_allegro-herbert-base-cased_25.pt
-│   │   ├── train.txt
-│   │   ├── valid_allegro-herbert-base-cased_25.pt
-│   │   └── valid.txt
-│   ├── raw
-│   │   ├── test.txt
-│   │   ├── train.txt
-│   │   └── valid.txt
-│   └── preprocess.sh
-├── polish_ner
-│   ├── datasets
-│   │   ├── dataloaders.py
-│   │   ├── __init__.py
-│   │   └── ner_dataset.py
-│   ├── models
-│   │   ├── base.py
-│   │   ├── early_stopping.py
-│   │   ├── __init__.py
-│   │   └── ner_model.py
-│   ├── networks
-│   │   ├── auto_transformer.py
-│   │   └── __init__.py
-│   ├── __init__.py
-│   └── predictor.py
-├── tasks
-│   ├── config.json
-│   ├── predict_tags.sh
-│   ├── start_app.sh
-│   └── train_polish_ner.sh
-├── training
-│   └── run_experiment.py
-├── weights
-│   └── NerModel_NerDataset_allegro-herbert-base-cased_2021-04-12_18:55_weights.pt
-├── demo.png
-├── Dockerfile
-├── .gitignore
-├── LICENSE
-├── README.md
-└── requirements.txt
+├── app  
+│   ├── static  
+│   │   └── css  
+│   │       └── main.css  
+│   ├── templates  
+│   │   ├── base.html  
+│   │   └── index.html  
+│   └── app.py  
+├── data  
+│   ├── preprocessed  
+│   │   ├── test.txt  
+│   │   ├── train.txt  
+│   │   └── valid.txt  
+│   ├── raw  
+│   │   ├── test.txt  
+│   │   ├── train.txt  
+│   │   └── valid.txt  
+│   └── preprocess.sh  
+├── polish_ner  
+│   ├── datasets  
+│   │   ├── dataloaders.py  
+│   │   ├── __init__.py  
+│   │   └── ner_dataset.py  
+│   ├── models  
+│   │   ├── base.py  
+│   │   ├── early_stopping.py  
+│   │   ├── __init__.py  
+│   │   └── ner_model.py  
+│   ├── networks  
+│   │   ├── auto_transformer.py  
+│   │   └── __init__.py  
+│   ├── __init__.py  
+│   └── predictor.py  
+├── tasks  
+│   ├── config.json  
+│   ├── predict_tags.sh  
+│   ├── start_app.sh  
+│   └── train_polish_ner.sh  
+├── training  
+│   └── run_experiment.py  
+├── weights  
+│   └── NerModel_NerDataset_allegro-herbert-base-cased_2021-04-12_18:55_weights.pt  
+├── demo.png  
+├── Dockerfile  
+├── .gitignore  
+├── LICENSE  
+├── README.md  
+└── requirements.txt  
 
 ## Data
 
